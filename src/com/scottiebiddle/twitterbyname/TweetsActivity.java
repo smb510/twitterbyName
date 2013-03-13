@@ -27,9 +27,12 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ArrayAdapter;
@@ -38,6 +41,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 public class TweetsActivity extends Activity {
@@ -180,7 +184,24 @@ public class TweetsActivity extends Activity {
 				
 			}});
        //new TwitterHelper(this).execute("smb510");  
-       currentUser = "smb510";
+       currentUser = "";
+       EditText searchBar = (EditText) findViewById(R.id.searchBar);
+       searchBar.setOnEditorActionListener(new OnEditorActionListener() {
+    	    
+
+			@Override
+			public boolean onEditorAction(TextView arg0, int arg1, KeyEvent arg2) {
+				// TODO Auto-generated method stub
+				if(arg1 == EditorInfo.IME_ACTION_DONE)
+				{
+					searchUserByName(arg0.getText().toString());
+
+				}
+				return false;
+			}
+    	});
+       
+       
     }
 
     
@@ -193,6 +214,8 @@ public class TweetsActivity extends Activity {
     	loader = new TwitterHelper(this);
     	loader.execute(text.getText().toString());
     	currentUser = text.getText().toString();
+    	InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+    	imm.hideSoftInputFromWindow(text.getWindowToken(), 0);
     }
     
     public void searchUserByName(String username)
@@ -202,8 +225,10 @@ public class TweetsActivity extends Activity {
     	loader.execute(username);
     	currentUser = username;
     	EditText e = (EditText) findViewById(R.id.searchBar);
+    	if(username.charAt(0) == '@')
+    	{
     	e.setText(currentUser.substring(1));
-    	
+    	}
     }
     
     public void searchUserFromReply(View view)
