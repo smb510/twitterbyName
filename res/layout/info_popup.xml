@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/user_avatar"
         android:layout_alignTop="@+id/user_avatar"
-        android:layout_marginLeft="16dp"
+        android:layout_marginLeft="4dp"
         android:layout_toRightOf="@+id/user_avatar"
         android:text="" />
 

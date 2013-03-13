@@ -13,14 +13,27 @@
         android:text="" />
     
     <TextView
-        android:id="@+id/tweetMetadata"
+        android:id="@+id/tweetReply"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="false"
         android:layout_below="@+id/tweetContent"
         android:layout_toRightOf="@+id/avatar"
         android:layout_alignParentRight="true"
+        android:text=""
+        android:onClick="searchUserFromReply"
+        android:clickable="true" />
+    
+    <TextView
+        android:id="@+id/tweetMetadata"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="false"
+        android:layout_below="@+id/tweetReply"
+        android:layout_toRightOf="@+id/avatar"
+        android:layout_alignParentRight="true"
         android:text="" />
+    
 
     <ImageView
         android:id="@+id/avatar"
@@ -28,7 +41,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_below="@+id/tweetContent"
         android:layout_centerVertical="true"
         android:contentDescription="User&apos;s Avatar"
         android:layout_marginRight="3dp"

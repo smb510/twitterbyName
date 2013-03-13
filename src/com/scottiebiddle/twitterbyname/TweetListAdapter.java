@@ -20,9 +20,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -105,6 +107,7 @@ bmImage.setImageBitmap(result);
 		
 		TextView content = (TextView) view.findViewById(R.id.tweetContent);
 		TextView metadata = (TextView) view.findViewById(R.id.tweetMetadata);
+		TextView replyTo = (TextView) view.findViewById(R.id.tweetReply);
 		twitter4j.Status s = (twitter4j.Status) getItem(index);
 		if (s.isRetweet())
 		{
@@ -116,6 +119,17 @@ bmImage.setImageBitmap(result);
 		content.setText(s.getText());
 		User u = s.getUser();
 		metadata.setText("by @" + u.getScreenName() + " on " + s.getCreatedAt().toString());
+		if (s.getInReplyToScreenName() != null)
+		{
+			replyTo.setText(Html.fromHtml("in reply to @<b>" + s.getInReplyToScreenName() + "</b>"));
+			replyTo.setClickable(true);
+			replyTo.setContentDescription(s.getInReplyToScreenName());
+		}
+		else
+		{
+			replyTo.setHeight(0);
+			//replyTo.setClickable(false);
+		}
 		
 		ImageView imageView = (ImageView) view.findViewById(R.id.avatar);
 		imageView.setContentDescription(u.getScreenName() + "#" + u.getFollowersCount() + "#" + u.getFriendsCount());

@@ -201,7 +201,16 @@ public class TweetsActivity extends Activity {
     	loader = new TwitterHelper(this);
     	loader.execute(username);
     	currentUser = username;
+    	EditText e = (EditText) findViewById(R.id.searchBar);
+    	e.setText(currentUser.substring(1));
     	
+    }
+    
+    public void searchUserFromReply(View view)
+    {
+    	TextView text = (TextView) view;
+    	String username = text.getContentDescription().toString();
+    	new TwitterHelper(this).execute(username);
     }
     
     public void getUserInfo(View view)
@@ -218,9 +227,12 @@ public class TweetsActivity extends Activity {
     	TextView following = (TextView) infoView.findViewById(R.id.following);
     	TextView followers = (TextView) infoView.findViewById(R.id.followers);
     	
-    	username.setText(info[0]);
+    	username.setText("@" + info[0]);
+    	username.setTextSize(22);
     	following.setText(info[2] + " following");
     	followers.setText(info[1] + " followers");
+    	following.setTextSize(18);
+    	followers.setTextSize(18);
     	builder.setView(infoView);
     	AlertDialog dialog = builder.create();
     	dialog.setButton(AlertDialog.BUTTON_POSITIVE, "View Tweets", new DialogInterface.OnClickListener(){
@@ -246,10 +258,6 @@ public class TweetsActivity extends Activity {
 			}
 		});
     	dialog.show();
-    	
-    	
-    	
-    	
     	
     }
     
