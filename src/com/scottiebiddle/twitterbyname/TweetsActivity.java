@@ -7,9 +7,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Message;
 import twitter4j.Paging;
 import twitter4j.ResponseList;
 import twitter4j.Status;
@@ -18,10 +20,14 @@ import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
 import twitter4j.conf.*;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AbsListView;
@@ -31,6 +37,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class TweetsActivity extends Activity {
@@ -39,8 +46,8 @@ public class TweetsActivity extends Activity {
 	private String currentUser;
 	public boolean loading;
 	private HashMap<String, Bitmap> avatars;
-	
-	private class TwitterHelper extends AsyncTask<String, Long, ResponseList<Status>>
+	public TwitterHelper loader;
+	public class TwitterHelper extends AsyncTask<String, Long, ResponseList<Status>>
 	{
 		private ConfigurationBuilder conf;
 		private TweetsActivity tweetActivity;
@@ -135,14 +142,14 @@ public class TweetsActivity extends Activity {
 		TweetListAdapter<Status> tweetAdapter = new TweetListAdapter<Status>(this, R.layout.avatar_list, tweets);		
 		list.setAdapter(tweetAdapter);
 		list.refreshDrawableState();
-		page = new Paging(1, 40);
+		page = new Paging(1, 20);
 	}
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	avatars = new HashMap<String, Bitmap>();
     	loading = false;
-    	page = new Paging(1, 40);
+    	page = new Paging(1, 20);
     	final TweetsActivity act = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tweets);
@@ -150,7 +157,7 @@ public class TweetsActivity extends Activity {
         list.setOnScrollListener(new OnScrollListener(){
 			@Override
 			public void onScroll(AbsListView arg0, int first, int visible, int total) {
-				Log.d("SBRuntime", "First : " + first + " visible : " + visible + " Total: " + total);
+				//Log.d("SBRuntime", "First : " + first + " visible : " + visible + " Total: " + total);
 
 				boolean loadMore = first + visible >= total && total != 0;
 				if(loadMore && !loading)
@@ -159,7 +166,8 @@ public class TweetsActivity extends Activity {
 					Paging page = act.page;
 					page.setPage(page.getPage() + 1);
 					loading = true;
-					new TwitterHelper(act).execute(currentUser);
+					loader = new TwitterHelper(act);
+					loader.execute(currentUser);
 					
 					
 				}
@@ -171,7 +179,7 @@ public class TweetsActivity extends Activity {
 				// TODO Auto-generated method stub
 				
 			}});
-       new TwitterHelper(this).execute("smb510");  
+       //new TwitterHelper(this).execute("smb510");  
        currentUser = "smb510";
     }
 
@@ -182,15 +190,65 @@ public class TweetsActivity extends Activity {
     	list.setAdapter(null);
     	list.refreshDrawableState();
     	EditText text = (EditText) findViewById(R.id.searchBar);
-    	new TwitterHelper(this).execute(text.getText().toString());
+    	loader = new TwitterHelper(this);
+    	loader.execute(text.getText().toString());
     	currentUser = text.getText().toString();
+    }
+    
+    public void searchUserByName(String username)
+    {
+    	
+    	loader = new TwitterHelper(this);
+    	loader.execute(username);
+    	currentUser = username;
+    	
     }
     
     public void getUserInfo(View view)
     {
     	ImageView src= (ImageView) view;
     	String user = (String) src.getContentDescription();
-    	Toast.makeText(this, user, Toast.LENGTH_SHORT).show();
+    	String[] info = user.split("#");
+    	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+    	LayoutInflater li = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View infoView = li.inflate(R.layout.info_popup, null);
+    	ImageView avatar = (ImageView) infoView.findViewById(R.id.user_avatar);
+    	avatar.setImageDrawable(src.getDrawable());
+    	TextView username = (TextView) infoView.findViewById(R.id.username);
+    	TextView following = (TextView) infoView.findViewById(R.id.following);
+    	TextView followers = (TextView) infoView.findViewById(R.id.followers);
+    	
+    	username.setText(info[0]);
+    	following.setText(info[2] + " following");
+    	followers.setText(info[1] + " followers");
+    	builder.setView(infoView);
+    	AlertDialog dialog = builder.create();
+    	dialog.setButton(AlertDialog.BUTTON_POSITIVE, "View Tweets", new DialogInterface.OnClickListener(){
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				AlertDialog sender = (AlertDialog) dialog;
+				TextView name = (TextView) sender.findViewById(R.id.username);
+				searchUserByName(name.getText().toString());
+				sender.dismiss();
+				
+			}	
+    	});
+    	
+    	dialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Dismiss", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				dialog.dismiss();
+				
+			}
+		});
+    	dialog.show();
+    	
+    	
+    	
     	
     	
     }

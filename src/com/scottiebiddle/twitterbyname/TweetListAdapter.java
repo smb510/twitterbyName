@@ -93,6 +93,7 @@ bmImage.setImageBitmap(result);
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public View getView(int index, View v, ViewGroup vg)
 	{
 		View view = v;
@@ -105,12 +106,19 @@ bmImage.setImageBitmap(result);
 		TextView content = (TextView) view.findViewById(R.id.tweetContent);
 		TextView metadata = (TextView) view.findViewById(R.id.tweetMetadata);
 		twitter4j.Status s = (twitter4j.Status) getItem(index);
+		if (s.isRetweet())
+		{
+			Status r = s.getRetweetedStatus();
+			remove((T) s);
+			insert((T) r, index);
+			s = r;
+		}
 		content.setText(s.getText());
 		User u = s.getUser();
-		metadata.setText("by @" + u.getScreenName() + " at " + s.getCreatedAt().toString());
+		metadata.setText("by @" + u.getScreenName() + " on " + s.getCreatedAt().toString());
 		
 		ImageView imageView = (ImageView) view.findViewById(R.id.avatar);
-		imageView.setContentDescription(u.getScreenName());
+		imageView.setContentDescription(u.getScreenName() + "#" + u.getFollowersCount() + "#" + u.getFriendsCount());
 		String url = s.getUser().getProfileImageURL();
 		new DownloadImageTask(imageView).execute(url);
 		
